@@ -1,0 +1,34 @@
+# Maven
+target/
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+logs/
+
+# Secrets
+.env
+.env.local
+application-local.yml
+application-secrets.yml
+
+# Build output
+build/
+out/
