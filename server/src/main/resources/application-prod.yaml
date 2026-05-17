@@ -1,0 +1,14 @@
+# On Render, set these environment variables:
+#   SPRING_DATASOURCE_URL      jdbc:postgresql://<host>:<port>/<db>
+#   SPRING_DATASOURCE_USERNAME <db user>
+#   SPRING_DATASOURCE_PASSWORD <db password>
+# Render's DATABASE_URL is postgres:// format; convert it to JDBC format above.
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: ${PORT:8080}
