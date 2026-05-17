@@ -1,9 +1,9 @@
 ﻿-- Test users
--- password_hash placeholders; real BCrypt hashes generated when JWT auth is wired in
+-- driver passwords: driver123; admin password: admin123
 INSERT INTO users (email, password_hash, role) VALUES
-    ('driver1@example.com', '$2a$10$placeholderdriverhash', 'DRIVER'),
-    ('driver2@example.com', '$2a$10$placeholderdriverhash', 'DRIVER'),
-    ('admin@example.com',   '$2a$10$placeholderadminhash',  'ADMIN');
+    ('driver1@example.com', '$2a$10$ReFXgUEi43ku3Vclr3yIXeQsbWQvpwN9ZsKbZP4BAuMJUhauvx922', 'DRIVER'),
+    ('driver2@example.com', '$2a$10$ReFXgUEi43ku3Vclr3yIXeQsbWQvpwN9ZsKbZP4BAuMJUhauvx922', 'DRIVER'),
+    ('admin@example.com',   '$2a$10$2Xb8TdKuCvTxsBWg4UIY/.9Wf4xqoqGis4teAEsf.x4UiW73hkm1O',  'ADMIN');
 
 -- Stations around central London
 INSERT INTO stations (name, address, latitude, longitude) VALUES
