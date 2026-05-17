@@ -4,12 +4,14 @@ import com.evbooking.server.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import java.time.OffsetDateTime;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         SELECT COUNT(b) > 0
         FROM Booking b
