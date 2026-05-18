@@ -9,6 +9,8 @@ import com.evbooking.server.repository.BookingRepository;
 import com.evbooking.server.repository.ConnectorRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import com.evbooking.server.entity.User;
+
 
 @Service
 public class BookingService {
@@ -58,6 +60,11 @@ public class BookingService {
         }
 
         Booking booking = new Booking();
+
+        User user = new User();
+        user.setId(1L);
+
+        booking.setUser(user);
 
         booking.setConnector(connector);
         booking.setStartTime(request.startTime());
