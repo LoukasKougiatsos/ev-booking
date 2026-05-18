@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.evbooking.server.entity.User;
 import java.util.List;
+import com.evbooking.server.booking.dto.UpdateBookingRequest;
 
 @Service
 public class BookingService {
@@ -90,6 +91,53 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         booking.setStatus(BookingStatus.CANCELLED);
+
+        return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public Booking updateBooking(
+            Long bookingId,
+            UpdateBookingRequest request
+    ) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (!request.endTime().isAfter(request.startTime())) {
+            throw new ConflictException(
+                    "End time must be after start time"
+            );
+        }
+
+        boolean connectorConflict =
+                bookingRepository.existsConflict(
+                        booking.getConnector().getId(),
+                        request.startTime(),
+                        request.endTime()
+                );
+
+        if (connectorConflict) {
+            throw new ConflictException(
+                    "Booking slot already taken"
+            );
+        }
+
+        boolean userOverlap =
+                bookingRepository.existsUserOverlap(
+                        booking.getUser().getId(),
+                        request.startTime(),
+                        request.endTime()
+                );
+
+        if (userOverlap) {
+            throw new ConflictException(
+                    "User already has an overlapping booking"
+            );
+        }
+
+        booking.setStartTime(request.startTime());
+        booking.setEndTime(request.endTime());
 
         return bookingRepository.save(booking);
     }

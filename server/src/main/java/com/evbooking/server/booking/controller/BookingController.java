@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.evbooking.server.entity.Booking;
+import com.evbooking.server.booking.dto.UpdateBookingRequest;
 
 
 @RestController
@@ -45,5 +46,16 @@ public class BookingController {
             @PathVariable Long id
     ) {
         return bookingService.cancelBooking(id);
+    }
+
+    @PutMapping("/{id}")
+    public Booking updateBooking(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateBookingRequest request
+    ) {
+        return bookingService.updateBooking(
+                id,
+                request
+        );
     }
 }

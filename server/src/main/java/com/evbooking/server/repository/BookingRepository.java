@@ -29,4 +29,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             OffsetDateTime endTime
     );
     List<Booking> findByUserId(Long userId);
+
+    @Query("""
+    SELECT COUNT(b) > 0
+    FROM Booking b
+    WHERE b.user.id = :userId
+    AND b.status = 'ACTIVE'
+    AND (
+        :startTime < b.endTime
+        AND :endTime > b.startTime
+    )
+""")
+    boolean existsUserOverlap(
+            Long userId,
+            OffsetDateTime startTime,
+            OffsetDateTime endTime
+    );
 }
