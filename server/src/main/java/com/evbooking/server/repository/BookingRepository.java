@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -27,4 +28,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             OffsetDateTime startTime,
             OffsetDateTime endTime
     );
+    List<Booking> findByUserId(Long userId);
 }

@@ -10,7 +10,7 @@ import com.evbooking.server.repository.ConnectorRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.evbooking.server.entity.User;
-
+import java.util.List;
 
 @Service
 public class BookingService {
@@ -72,5 +72,14 @@ public class BookingService {
         booking.setStatus(BookingStatus.ACTIVE);
 
         return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getMyBookings(
+            Long userId
+    ) {
+
+        return bookingRepository.findByUserId(
+                userId
+        );
     }
 }
