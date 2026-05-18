@@ -82,4 +82,15 @@ public class BookingService {
                 userId
         );
     }
+
+    @Transactional
+    public Booking cancelBooking(Long bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        booking.setStatus(BookingStatus.CANCELLED);
+
+        return bookingRepository.save(booking);
+    }
 }
