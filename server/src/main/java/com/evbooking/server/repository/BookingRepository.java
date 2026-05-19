@@ -45,4 +45,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             OffsetDateTime startTime,
             OffsetDateTime endTime
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+    SELECT b
+    FROM Booking b
+    WHERE b.connector.id = :connectorId
+    AND b.status = 'ACTIVE'
+""")
+    List<Booking> lockActiveBookingsForConnector(
+            Long connectorId
+    );
 }

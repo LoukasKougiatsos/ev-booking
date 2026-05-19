@@ -49,6 +49,10 @@ public class BookingService {
             );
         }
 
+        bookingRepository.lockActiveBookingsForConnector(
+                connector.getId()
+        );
+
         boolean conflict =
                 bookingRepository.existsConflict(
                         connector.getId(),
