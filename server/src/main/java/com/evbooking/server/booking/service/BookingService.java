@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import com.evbooking.server.entity.User;
 import java.util.List;
 import com.evbooking.server.booking.dto.UpdateBookingRequest;
+import com.evbooking.server.booking.exception.ForbiddenOperationException;
+import java.time.OffsetDateTime;
+
 
 @Service
 public class BookingService {
@@ -90,6 +93,11 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
+        if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
+            throw new ForbiddenOperationException(
+                    "Cannot cancel a booking that has already started"
+            );
+        }
         booking.setStatus(BookingStatus.CANCELLED);
 
         return bookingRepository.save(booking);
@@ -107,6 +115,12 @@ public class BookingService {
         if (!request.endTime().isAfter(request.startTime())) {
             throw new ConflictException(
                     "End time must be after start time"
+            );
+        }
+
+        if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
+            throw new ForbiddenOperationException(
+                    "Cannot modify a booking that has already started"
             );
         }
 

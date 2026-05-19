@@ -15,7 +15,17 @@ public class BookingExceptionHandler {
     public Map<String, String> handleConflict(
             ConflictException ex
     ) {
+        return Map.of(
+                "error",
+                ex.getMessage()
+        );
+    }
 
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleForbidden(
+            ForbiddenOperationException ex
+    ) {
         return Map.of(
                 "error",
                 ex.getMessage()
