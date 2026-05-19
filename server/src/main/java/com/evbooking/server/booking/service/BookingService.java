@@ -14,7 +14,7 @@ import java.util.List;
 import com.evbooking.server.booking.dto.UpdateBookingRequest;
 import com.evbooking.server.booking.exception.ForbiddenOperationException;
 import java.time.OffsetDateTime;
-
+import com.evbooking.server.booking.exception.NotFoundException;
 
 @Service
 public class BookingService {
@@ -39,10 +39,9 @@ public class BookingService {
                 connectorRepository.findById(
                         request.connectorId()
                 ).orElseThrow(() ->
-                        new RuntimeException(
-                                "Connector not found"
-                        )
-                );
+                        new NotFoundException("Booking not found"));
+
+
 
         if (!request.endTime().isAfter(request.startTime())) {
             throw new ConflictException(
@@ -91,7 +90,7 @@ public class BookingService {
     public Booking cancelBooking(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new NotFoundException("Booking not found"));
 
         if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
             throw new ForbiddenOperationException(
@@ -110,7 +109,7 @@ public class BookingService {
     ) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new NotFoundException("Booking not found"));
 
         if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
             throw new ForbiddenOperationException(
