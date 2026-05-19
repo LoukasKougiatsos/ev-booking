@@ -112,6 +112,12 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
+        if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
+            throw new ForbiddenOperationException(
+                    "Cannot modify a booking that has already started"
+            );
+        }
+
         if (!request.endTime().isAfter(request.startTime())) {
             throw new ConflictException(
                     "End time must be after start time"
