@@ -15,6 +15,8 @@ import com.evbooking.server.booking.dto.UpdateBookingRequest;
 import com.evbooking.server.booking.exception.ForbiddenOperationException;
 import java.time.OffsetDateTime;
 import com.evbooking.server.booking.exception.NotFoundException;
+import com.evbooking.server.booking.dto.BookingResponse;
+
 
 @Service
 public class BookingService {
@@ -31,7 +33,7 @@ public class BookingService {
     }
 
     @Transactional
-    public Booking createBooking(
+    public BookingResponse createBooking(
             CreateBookingRequest request
     ) {
 
@@ -78,20 +80,21 @@ public class BookingService {
         booking.setEndTime(request.endTime());
         booking.setStatus(BookingStatus.ACTIVE);
 
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        return toResponse(savedBooking);
     }
 
-    public List<Booking> getMyBookings(
-            Long userId
-    ) {
+    public List<BookingResponse> getMyBookings(Long userId) {
 
-        return bookingRepository.findByUserId(
-                userId
-        );
+        return bookingRepository.findByUserId(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional
-    public Booking cancelBooking(Long bookingId) {
+    public BookingResponse cancelBooking(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
@@ -103,11 +106,13 @@ public class BookingService {
         }
         booking.setStatus(BookingStatus.CANCELLED);
 
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        return toResponse(savedBooking);
     }
 
     @Transactional
-    public Booking updateBooking(
+    public BookingResponse updateBooking(
             Long bookingId,
             UpdateBookingRequest request
     ) {
@@ -162,6 +167,22 @@ public class BookingService {
         booking.setStartTime(request.startTime());
         booking.setEndTime(request.endTime());
 
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        return toResponse(savedBooking);
+    }
+
+    private BookingResponse toResponse(Booking booking) {
+
+        return new BookingResponse(
+                booking.getId(),
+                booking.getUser().getId(),
+                booking.getConnector().getId(),
+                booking.getStartTime(),
+                booking.getEndTime(),
+                booking.getStatus().name(),
+                booking.getCreatedAt(),
+                booking.getUpdatedAt()
+        );
     }
 }

@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.evbooking.server.entity.Booking;
 import com.evbooking.server.booking.dto.UpdateBookingRequest;
-
+import com.evbooking.server.booking.dto.BookingResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
@@ -23,7 +24,7 @@ public class BookingController {
     }
 
     @PostMapping
-    public Booking createBooking(
+    public BookingResponse createBooking(
             @Valid @RequestBody
             CreateBookingRequest request
     ) {
@@ -34,7 +35,7 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public List<Booking> getMyBookings() {
+    public List<BookingResponse> getMyBookings() {
 
         return bookingService.getMyBookings(
                 1L
@@ -42,14 +43,14 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
-    public Booking cancelBooking(
+    public BookingResponse cancelBooking(
             @PathVariable Long id
     ) {
         return bookingService.cancelBooking(id);
     }
 
     @PutMapping("/{id}")
-    public Booking updateBooking(
+    public BookingResponse updateBooking(
             @PathVariable Long id,
             @Valid @RequestBody UpdateBookingRequest request
     ) {
