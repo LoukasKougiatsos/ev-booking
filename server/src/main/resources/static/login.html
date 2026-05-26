@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>ChargeFlow Login</title>
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card">
+      <section class="auth-left">
+        <img src="assets/loginpage.png" alt="EV charging station">
+        <div class="auth-left-overlay">
+          <h2>&#128267; ChargeFlow</h2>
+          <p>Reliable power for your journey. Access the global network of high-performance charging stations.</p>
+        </div>
+      </section>
+
+      <section class="auth-right">
+        <p class="signin-label">Sign In</p>
+        <h1>ACCESS YOUR DASHBOARD</h1>
+
+        <form class="auth-form">
+          <label for="username">USERNAME</label>
+          <div class="field-wrap">
+            <span class="field-icon">&#128100;</span>
+            <input id="username" name="username" type="text" placeholder="Enter your username">
+          </div>
+
+          <div class="field-head">
+            <label for="password">PASSWORD</label>
+            <a href="#" aria-label="Forgot password">Forgot?</a>
+          </div>
+          <div class="field-wrap">
+            <span class="field-icon">&#128274;</span>
+            <input id="password" name="password" type="password" placeholder="********">
+          </div>
+
+          <label class="remember-row" for="remember">
+            <input id="remember" name="remember" type="checkbox">
+            <span>Remember this device</span>
+          </label>
+
+          <button class="auth-btn-primary" type="submit">Sign In &#8594;</button>
+
+          <div class="separator"></div>
+
+          <p class="auth-alt-title">New to the network?</p>
+          <button class="auth-btn-secondary" type="button">Create Account</button>
+        </form>
+      </section>
+    </section>
+
+    <footer class="auth-footer">
+      <nav>
+        <a href="#">PRIVACY POLICY</a>
+        <a href="#">TERMS OF SERVICE</a>
+        <a href="#">SYSTEM STATUS</a>
+      </nav>
+      <p>&copy; 2024 ChargeFlow Infrastructure Ltd.</p>
+    </footer>
+  </main>
+</body>
+</html>
