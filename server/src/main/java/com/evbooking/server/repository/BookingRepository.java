@@ -56,4 +56,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> lockActiveBookingsForConnector(
             Long connectorId
     );
+
+    @Query("""
+    SELECT b
+    FROM Booking b
+    WHERE b.connector.id = :connectorId
+    AND b.status = 'ACTIVE'
+    AND b.startTime < :dayEnd
+    AND b.endTime > :dayStart
+""")
+    List<Booking> findActiveForConnectorBetween(
+            Long connectorId,
+            OffsetDateTime dayStart,
+            OffsetDateTime dayEnd
+    );
 }

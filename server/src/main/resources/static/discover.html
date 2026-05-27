@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChargeFlow Discovery</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="discover-page">
+    <section class="discover-shell">
+      <header class="discover-topbar">
+        <a class="discover-brand" href="index.html">CHARGEFLOW</a>
+        <nav class="discover-nav">
+          <a class="active" href="#">DISCOVER</a>
+          <a href="#">MY BOOKINGS</a>
+          <a href="#">PROFILE</a>
+        </nav>
+        <div class="discover-top-icons">
+          <span>&#9786;</span>
+        </div>
+      </header>
+
+      <section class="discover-layout">
+        <section class="discover-map-area">
+          <form id="discover-search-form" class="discover-search">
+            <span>&#128269;</span>
+            <input id="discover-search-input" type="text" placeholder="Search city or address..." />
+            <button type="submit" class="search-btn">Search</button>
+          </form>
+
+          <div id="discover-map" class="discover-map" aria-label="Station map"></div>
+
+          <div class="map-tools">
+            <button id="map-recenter" type="button" aria-label="Recenter map">&#128205;</button>
+            <button id="map-zoom-in" type="button" aria-label="Zoom in">+</button>
+          </div>
+        </section>
+
+        <aside class="discover-panel">
+          <h1>Station Discovery</h1>
+
+          <div class="filter-group" data-filter-group="connector">
+            <h2>CONNECTOR TYPES</h2>
+            <div class="chips">
+              <button class="chip active" data-value="all" type="button">All</button>
+              <button class="chip" data-value="ccs" type="button">CCS</button>
+              <button class="chip" data-value="type2" type="button">Type 2</button>
+              <button class="chip" data-value="chademo" type="button">CHAdeMO</button>
+            </div>
+          </div>
+
+          <div class="station-list"></div>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <section id="station-details-modal" class="details-modal" aria-hidden="true">
+    <div class="details-backdrop" data-close-modal="true"></div>
+    <article class="details-card" role="dialog" aria-modal="true" aria-labelledby="details-station-name">
+      <button id="details-close" class="details-close" type="button" aria-label="Close details">&times;</button>
+      <img class="details-image" src="assets/registerpage.png" alt="Charging station image">
+      <h2 id="details-station-name">Station Name</h2>
+      <p id="details-station-subtitle" class="details-subtitle"></p>
+      <p id="details-station-meta" class="details-meta"></p>
+
+      <h3 class="details-section-title">Connectors</h3>
+      <div id="connector-list" class="connector-list"></div>
+
+      <section class="reserve-box">
+        <div class="reserve-head">
+          <h3>Reserve a Slot</h3>
+          <div class="reserve-controls">
+            <label for="connector-select">Connector</label>
+            <select id="connector-select"></select>
+            <input id="reserve-date" type="date">
+          </div>
+        </div>
+        <div id="slot-grid" class="slot-grid"></div>
+
+        <div class="selected-row">
+          <span>Selected Slot:</span>
+          <strong id="selected-slot-label">None</strong>
+        </div>
+
+        <form id="booking-form" class="booking-form">
+          <input id="start-time" type="hidden" required>
+          <input id="end-time" type="hidden" required>
+          <button id="confirm-slot-btn" class="confirm-slot-btn" type="submit">Confirm Booking</button>
+        </form>
+
+        <p id="booking-message" class="booking-message"></p>
+      </section>
+    </article>
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="discover.js"></script>
+</body>
+</html>
