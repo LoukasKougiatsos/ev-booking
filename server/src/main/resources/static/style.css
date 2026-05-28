@@ -324,6 +324,18 @@ footer {
   margin-bottom: 12px;
 }
 
+.login-message {
+  min-height: 1.2em;
+  margin-top: 8px;
+  font-size: 0.86rem;
+  color: #4d5f87;
+}
+
+.login-message.error {
+  color: #b32222;
+  font-weight: 700;
+}
+
 .auth-footer {
   width: min(1120px, 100%);
   margin: auto auto 0;

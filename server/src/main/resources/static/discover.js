@@ -1,4 +1,8 @@
 (function () {
+  if (!window.Auth || !window.Auth.requireAuth()) {
+    return;
+  }
+
   var center = [37.7749, -122.4194];
 
   var map = L.map("discover-map", {
@@ -151,7 +155,7 @@
 
       var apiUrl = new URL("api/stations", window.location.href);
       apiUrl.search = params.toString();
-      var response = await fetch(apiUrl.toString());
+      var response = await window.Auth.authFetch(apiUrl.toString());
       if (!response.ok) throw new Error("Could not load stations (" + response.status + ")");
 
       allStations = await response.json();
@@ -206,7 +210,7 @@
   }
 
   async function loadConnectors() {
-    var response = await fetch("/api/connectors");
+    var response = await window.Auth.authFetch("/api/connectors");
     if (!response.ok) throw new Error("Could not load connectors");
     return response.json();
   }
@@ -214,7 +218,7 @@
   async function loadSlots(connectorId, date) {
     var url = new URL("/api/connectors/" + connectorId + "/slots", window.location.origin);
     url.searchParams.set("date", date);
-    var response = await fetch(url.toString());
+    var response = await window.Auth.authFetch(url.toString());
     if (!response.ok) throw new Error("Could not load slots");
     return response.json();
   }
@@ -340,7 +344,7 @@
     };
 
     try {
-      var response = await fetch("/bookings", {
+      var response = await window.Auth.authFetch("/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -414,3 +418,4 @@
     reserveDate.value = today.toISOString().slice(0, 10);
   }
 })();
+

@@ -21,11 +21,11 @@
         <p class="signin-label">Sign In</p>
         <h1>ACCESS YOUR DASHBOARD</h1>
 
-        <form class="auth-form">
-          <label for="username">USERNAME</label>
+        <form id="login-form" class="auth-form">
+          <label for="username">EMAIL</label>
           <div class="field-wrap">
             <span class="field-icon">&#128100;</span>
-            <input id="username" name="username" type="text" placeholder="Enter your username">
+            <input id="username" name="username" type="email" placeholder="Enter your email" required>
           </div>
 
           <div class="field-head">
@@ -34,7 +34,7 @@
           </div>
           <div class="field-wrap">
             <span class="field-icon">&#128274;</span>
-            <input id="password" name="password" type="password" placeholder="********">
+            <input id="password" name="password" type="password" placeholder="********" required>
           </div>
 
           <label class="remember-row" for="remember">
@@ -43,6 +43,7 @@
           </label>
 
           <button class="auth-btn-primary" type="submit">Sign In &#8594;</button>
+          <p id="login-message" class="login-message"></p>
 
           <div class="separator"></div>
 
@@ -61,5 +62,6 @@
       <p>&copy; 2024 ChargeFlow Infrastructure Ltd.</p>
     </footer>
   </main>
+  <script src="script.js"></script>
 </body>
 </html>
