@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings - ChargeFlow</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="bookings-page">
+    <section class="discover-shell">
+      <header class="discover-topbar">
+        <a class="discover-brand" href="index.html">CHARGEFLOW</a>
+        <nav class="discover-nav">
+          <a href="discover.html">DISCOVER</a>
+          <a class="active" href="mybookings.html">MY BOOKINGS</a>
+          <a href="#">PROFILE</a>
+        </nav>
+        <div class="discover-top-icons">
+          <span>&#128276;</span>
+          <button id="logout-btn" type="button" class="chip">Logout</button>
+        </div>
+      </header>
+
+      <section class="bookings-content">
+        <header class="bookings-header">
+          <h1>Upcoming Bookings</h1>
+          <p>Your scheduled charging sessions</p>
+        </header>
+
+        <p id="bookings-message" class="bookings-message"></p>
+
+        <section id="bookings-list" class="bookings-list" aria-live="polite"></section>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="modify-dialog" class="modify-dialog">
+    <form id="modify-form" method="dialog" class="modify-form">
+      <h2>Modify Booking</h2>
+      <p id="modify-booking-id" class="modify-meta"></p>
+      <label for="modify-date">Date</label>
+      <input id="modify-date" type="date" required>
+      <div class="modify-grid">
+        <div>
+          <label for="modify-start">Start time</label>
+          <input id="modify-start" type="time" required>
+        </div>
+        <div>
+          <label for="modify-end">End time</label>
+          <input id="modify-end" type="time" required>
+        </div>
+      </div>
+      <p id="modify-message" class="booking-message"></p>
+      <div class="modify-actions">
+        <button type="button" id="modify-cancel" class="btn-cancel">Close</button>
+        <button type="submit" class="btn-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+  <script src="mybookings.js"></script>
+</body>
+</html>

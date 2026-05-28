@@ -41,6 +41,15 @@
   var selectedSlot = null;
   var availableSlots = [];
 
+  function toLocalDateTime(dateStr, timeStr) {
+    return new Date(dateStr + "T" + timeStr + ":00");
+  }
+
+  function isPastSlot(dateStr, startTimeStr) {
+    if (!dateStr || !startTimeStr) return false;
+    return toLocalDateTime(dateStr, startTimeStr).getTime() <= Date.now();
+  }
+
   function escapeHtml(value) {
     if (value == null) return "";
     return String(value)
@@ -257,8 +266,10 @@
   function renderSlots(slots) {
     availableSlots = slots;
     slotGrid.innerHTML = slots.map(function (slot) {
-      var cls = slot.available ? "slot-btn" : "slot-btn disabled";
-      var disabled = slot.available ? "" : " disabled";
+      var expired = isPastSlot(reserveDate && reserveDate.value, slot.startTime);
+      var enabled = slot.available && !expired;
+      var cls = enabled ? "slot-btn" : "slot-btn disabled";
+      var disabled = enabled ? "" : " disabled";
       return '<button class="' + cls + '" data-start="' + slot.startTime + '" data-end="' + slot.endTime + '" type="button"' + disabled + '>' + slot.startTime + '</button>';
     }).join("");
 
@@ -334,6 +345,11 @@
 
     if (!connectorId || !date || !start || !end) {
       setBookingMessage("Please select connector, date, start and end time.", "error");
+      return;
+    }
+
+    if (isPastSlot(date, start)) {
+      setBookingMessage("Please choose a future time slot.", "error");
       return;
     }
 
@@ -414,8 +430,9 @@
   });
 
   if (reserveDate) {
-    var today = new Date();
-    reserveDate.value = today.toISOString().slice(0, 10);
+    var tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    reserveDate.value = tomorrow.toISOString().slice(0, 10);
+    reserveDate.min = new Date().toISOString().slice(0, 10);
   }
 })();
 
