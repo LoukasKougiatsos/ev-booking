@@ -30,6 +30,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
     List<Booking> findByUserId(Long userId);
 
+    List<Booking> findAllByOrderByStartTimeDesc();
+
     @Query("""
     SELECT COUNT(b) > 0
     FROM Booking b
@@ -42,6 +44,24 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 """)
     boolean existsUserOverlap(
             Long userId,
+            OffsetDateTime startTime,
+            OffsetDateTime endTime
+    );
+
+    @Query("""
+    SELECT COUNT(b) > 0
+    FROM Booking b
+    WHERE b.user.id = :userId
+    AND b.id <> :bookingId
+    AND b.status = 'ACTIVE'
+    AND (
+        :startTime < b.endTime
+        AND :endTime > b.startTime
+    )
+""")
+    boolean existsUserOverlapExcludingBooking(
+            Long userId,
+            Long bookingId,
             OffsetDateTime startTime,
             OffsetDateTime endTime
     );

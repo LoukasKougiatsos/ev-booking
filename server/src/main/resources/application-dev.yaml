@@ -1,14 +1,10 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:ev_booking;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  flyway:
-    enabled: false
+    url: jdbc:postgresql://localhost:55432/ev_booking
+    username: ev_user
+    password: dev_password
+    driver-class-name: org.postgresql.Driver
   jpa:
-    hibernate:
-      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -16,4 +12,4 @@ spring:
 
 app:
   ev:
-    api-key: ${EV_API_KEY:sa2hYuhmi00eGKS6uRtrn1cO8vjrnFC9tEhC0din}
+    api-key: ${EV_API_KEY:}
