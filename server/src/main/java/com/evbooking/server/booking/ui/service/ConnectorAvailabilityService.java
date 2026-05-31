@@ -32,6 +32,7 @@ public class ConnectorAvailabilityService {
             return connectorRepository.findAllWithStation().stream()
                     .map(connector -> new ConnectorOptionDto(
                             connector.getId(),
+                            connector.getStation().getId(),
                             connector.getStation().getName(),
                             connector.getConnectorType().name(),
                             connector.getMaxKw()
@@ -78,10 +79,10 @@ public class ConnectorAvailabilityService {
 
     private List<ConnectorOptionDto> fallbackConnectors() {
         return List.of(
-                new ConnectorOptionDto(1L, "Berlin-Mitte HyperHub", "CCS", BigDecimal.valueOf(350)),
-                new ConnectorOptionDto(2L, "Berlin-Mitte HyperHub", "CCS", BigDecimal.valueOf(350)),
-                new ConnectorOptionDto(3L, "Berlin-Mitte HyperHub", "CHADEMO", BigDecimal.valueOf(50)),
-                new ConnectorOptionDto(4L, "Berlin-Mitte HyperHub", "TYPE2", BigDecimal.valueOf(22))
+                new ConnectorOptionDto(1L, 1L, "Syntagma Charge Hub", "CCS", BigDecimal.valueOf(150)),
+                new ConnectorOptionDto(2L, 1L, "Syntagma Charge Hub", "CCS", BigDecimal.valueOf(50)),
+                new ConnectorOptionDto(3L, 1L, "Syntagma Charge Hub", "TYPE2", BigDecimal.valueOf(22)),
+                new ConnectorOptionDto(4L, 2L, "Piraeus Port Charge", "TYPE2", BigDecimal.valueOf(22))
         );
     }
 
