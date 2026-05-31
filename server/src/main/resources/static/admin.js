@@ -1,9 +1,23 @@
 (function () {
   if (!window.Auth || !window.Auth.requireAuth()) return;
 
+  // Decode JWT and redirect non-admins before rendering anything
+  (function checkAdminRole() {
+    var token = window.Auth.getToken();
+    if (!token) { window.location.href = 'discover.html'; return; }
+    try {
+      var payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (payload.role !== 'ADMIN') window.location.href = 'discover.html';
+    } catch (e) {
+      window.location.href = 'discover.html';
+    }
+  })();
+
   var state = {
     stations: [],
-    connectors: []
+    connectors: [],
+    bookings: [],
+    editingBookingId: null
   };
 
   function el(id) { return document.getElementById(id); }
@@ -31,24 +45,126 @@
     return new Date(dt).toLocaleString();
   }
 
+  function canModify(booking) {
+    return booking.status === 'ACTIVE' && new Date(booking.startTime) > Date.now();
+  }
+
   async function loadBookings() {
     var res = await window.Auth.authFetch("/api/admin/bookings");
     var bookings = await parseResponse(res, "Could not load bookings");
+    state.bookings = Array.isArray(bookings) ? bookings : [];
     var box = el("admin-bookings");
-    if (!Array.isArray(bookings) || bookings.length === 0) {
+    if (!state.bookings.length) {
       box.innerHTML = "<article class=\"booking-card\"><p>No bookings found.</p></article>";
       return;
     }
-    box.innerHTML = bookings.map(function (b) {
-      return "<article class=\"booking-card\">"
+    box.innerHTML = state.bookings.map(function (b) {
+      var actions = canModify(b)
+        ? "<div class=\"booking-actions\">"
+          + "<button class=\"modify-btn\" data-action=\"modify\" data-id=\"" + b.id + "\">Modify</button>"
+          + "<button class=\"cancel-btn\" data-action=\"cancel\" data-id=\"" + b.id + "\">Cancel</button>"
+          + "</div>"
+        : "";
+      return "<article class=\"booking-card\" data-id=\"" + b.id + "\">"
         + "<div class=\"booking-top\"><h3>Booking #" + b.id + "</h3><span class=\"badge neutral\">" + (b.status || "UNKNOWN") + "</span></div>"
         + "<div class=\"booking-meta-grid\">"
         + "<div><strong>User</strong><span>#" + b.userId + "</span></div>"
         + "<div><strong>Connector</strong><span>#" + b.connectorId + "</span></div>"
         + "<div><strong>Start</strong><span>" + fmt(b.startTime) + "</span></div>"
         + "<div><strong>End</strong><span>" + fmt(b.endTime) + "</span></div>"
-        + "</div></article>";
+        + "</div>"
+        + actions
+        + "</article>";
     }).join("");
+  }
+
+  async function cancelBookingAdmin(id) {
+    if (!confirm("Cancel booking #" + id + "? This cannot be undone.")) return;
+    try {
+      var res = await window.Auth.authFetch("/bookings/" + id, { method: "DELETE" });
+      await parseResponse(res, "Could not cancel booking");
+      setMessage("Booking #" + id + " cancelled.", false);
+      await loadBookings();
+    } catch (err) {
+      setMessage(err.message || "Cancel failed.", true);
+    }
+  }
+
+  function openAdminModifyDialog(id) {
+    var booking = state.bookings.find(function (b) { return b.id === id; });
+    if (!booking) return;
+    state.editingBookingId = id;
+
+    el("admin-modify-booking-id").textContent = "Booking #" + id + " (User #" + booking.userId + ")";
+    var start = new Date(booking.startTime);
+    var end = new Date(booking.endTime);
+    el("admin-modify-date").value = start.toISOString().slice(0, 10);
+    el("admin-modify-start").value = start.toISOString().slice(11, 16);
+    el("admin-modify-end").value = end.toISOString().slice(11, 16);
+    el("admin-modify-message").textContent = "";
+    el("admin-modify-message").className = "booking-message";
+
+    el("admin-modify-dialog").showModal();
+  }
+
+  async function submitAdminModify(evt) {
+    evt.preventDefault();
+    if (!state.editingBookingId) return;
+
+    var date = el("admin-modify-date").value;
+    var start = el("admin-modify-start").value;
+    var end = el("admin-modify-end").value;
+    var msgEl = el("admin-modify-message");
+
+    if (!date || !start || !end) {
+      msgEl.textContent = "Please fill in date and times.";
+      msgEl.className = "booking-message error";
+      return;
+    }
+
+    try {
+      var res = await window.Auth.authFetch("/bookings/" + state.editingBookingId, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startTime: date + "T" + start + ":00Z",
+          endTime: date + "T" + end + ":00Z"
+        })
+      });
+      var raw = await res.text();
+      var data = null;
+      try { data = raw ? JSON.parse(raw) : null; } catch (e) { data = null; }
+      if (!res.ok) {
+        throw new Error((data && (data.message || data.error)) || "Modify failed (" + res.status + ")");
+      }
+      msgEl.textContent = "Booking updated.";
+      msgEl.className = "booking-message success";
+      await loadBookings();
+      setTimeout(function () { el("admin-modify-dialog").close(); }, 400);
+    } catch (err) {
+      msgEl.textContent = err.message || "Modify failed.";
+      msgEl.className = "booking-message error";
+    }
+  }
+
+  function bindBookingActions() {
+    el("admin-bookings").addEventListener("click", function (e) {
+      var btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      var id = Number(btn.getAttribute("data-id"));
+      var action = btn.getAttribute("data-action");
+      if (action === "cancel") cancelBookingAdmin(id).catch(function (err) { setMessage(err.message, true); });
+      if (action === "modify") openAdminModifyDialog(id);
+    });
+  }
+
+  function initModifyDialog() {
+    var dlg = el("admin-modify-dialog");
+    var form = el("admin-modify-form");
+    var closeBtn = el("admin-modify-cancel");
+    if (!dlg || !form || !closeBtn) return;
+    closeBtn.addEventListener("click", function () { dlg.close(); });
+    form.addEventListener("submit", submitAdminModify);
   }
 
   function renderStationSelect() {
@@ -197,9 +313,7 @@
         el("station-lat").value = station.latitude;
         el("station-lng").value = station.longitude;
       }
-      if (act === "del-station") {
-        deleteStation(id).catch(function (err) { setMessage(err.message, true); });
-      }
+      if (act === "del-station") deleteStation(id).catch(function (err) { setMessage(err.message, true); });
     });
 
     el("admin-connectors").addEventListener("click", function (e) {
@@ -214,14 +328,14 @@
         el("connector-type").value = connector.connectorType;
         el("connector-kw").value = connector.maxKw;
       }
-      if (act === "del-connector") {
-        deleteConnector(id).catch(function (err) { setMessage(err.message, true); });
-      }
+      if (act === "del-connector") deleteConnector(id).catch(function (err) { setMessage(err.message, true); });
     });
   }
 
   async function init() {
     try {
+      bindBookingActions();
+      initModifyDialog();
       bindTableActions();
       el("station-form").addEventListener("submit", function (e) { saveStation(e).catch(function (err) { setMessage(err.message, true); }); });
       el("connector-form").addEventListener("submit", function (e) { saveConnector(e).catch(function (err) { setMessage(err.message, true); }); });

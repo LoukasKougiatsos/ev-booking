@@ -74,6 +74,30 @@
     </section>
   </main>
 
+  <dialog id="admin-modify-dialog" class="modify-dialog">
+    <form id="admin-modify-form" method="dialog" class="modify-form">
+      <h2>Modify Booking</h2>
+      <p id="admin-modify-booking-id" class="modify-meta"></p>
+      <label for="admin-modify-date">Date</label>
+      <input id="admin-modify-date" type="date" required>
+      <div class="modify-grid">
+        <div>
+          <label for="admin-modify-start">Start time</label>
+          <input id="admin-modify-start" type="time" required>
+        </div>
+        <div>
+          <label for="admin-modify-end">End time</label>
+          <input id="admin-modify-end" type="time" required>
+        </div>
+      </div>
+      <p id="admin-modify-message" class="booking-message"></p>
+      <div class="modify-actions">
+        <button type="button" id="admin-modify-cancel" class="btn-cancel">Close</button>
+        <button type="submit" class="btn-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="script.js"></script>
   <script src="admin.js"></script>
 </body>
