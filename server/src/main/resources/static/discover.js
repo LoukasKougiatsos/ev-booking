@@ -234,9 +234,11 @@
 
   function connectorsForStation(connectors, station) {
     if (!Array.isArray(connectors)) return [];
-    var desired = Number.isInteger(station && station.total) && station.total > 0 ? station.total : null;
-    if (!desired) return connectors;
-    return connectors.slice(0, desired);
+    var stationId = Number(station && station.id);
+    if (!Number.isFinite(stationId)) return connectors;
+    return connectors.filter(function (connector) {
+      return Number(connector.stationId) === stationId;
+    });
   }
 
   function renderConnectorList(connectors, station) {
