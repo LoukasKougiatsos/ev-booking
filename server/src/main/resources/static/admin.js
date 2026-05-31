@@ -90,6 +90,17 @@
     }
   }
 
+  function toLocalDateInput(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, "0");
+    var d = String(date.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+
+  function toLocalTimeInput(date) {
+    return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+  }
+
   function openAdminModifyDialog(id) {
     var booking = state.bookings.find(function (b) { return b.id === id; });
     if (!booking) return;
@@ -98,9 +109,9 @@
     el("admin-modify-booking-id").textContent = "Booking #" + id + " (User #" + booking.userId + ")";
     var start = new Date(booking.startTime);
     var end = new Date(booking.endTime);
-    el("admin-modify-date").value = start.toISOString().slice(0, 10);
-    el("admin-modify-start").value = start.toISOString().slice(11, 16);
-    el("admin-modify-end").value = end.toISOString().slice(11, 16);
+    el("admin-modify-date").value = toLocalDateInput(start);
+    el("admin-modify-start").value = toLocalTimeInput(start);
+    el("admin-modify-end").value = toLocalTimeInput(end);
     el("admin-modify-message").textContent = "";
     el("admin-modify-message").className = "booking-message";
 
@@ -127,8 +138,8 @@
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          startTime: date + "T" + start + ":00Z",
-          endTime: date + "T" + end + ":00Z"
+          startTime: new Date(date + "T" + start + ":00").toISOString(),
+          endTime: new Date(date + "T" + end + ":00").toISOString()
         })
       });
       var raw = await res.text();

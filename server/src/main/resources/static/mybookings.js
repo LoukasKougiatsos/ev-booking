@@ -41,7 +41,18 @@
   }
 
   function combineToIso(date, time) {
-    return date + "T" + time + ":00Z";
+    return new Date(date + "T" + time + ":00").toISOString();
+  }
+
+  function toLocalDateInput(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, "0");
+    var d = String(date.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+
+  function toLocalTimeInput(date) {
+    return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
   }
 
   function setPageMessage(text, isError) {
@@ -134,9 +145,9 @@
     var start = toDate(booking.startTime);
     var end = toDate(booking.endTime);
 
-    byId("modify-date").value = start.toISOString().slice(0, 10);
-    byId("modify-start").value = start.toISOString().slice(11, 16);
-    byId("modify-end").value = end.toISOString().slice(11, 16);
+    byId("modify-date").value = toLocalDateInput(start);
+    byId("modify-start").value = toLocalTimeInput(start);
+    byId("modify-end").value = toLocalTimeInput(end);
     byId("modify-message").textContent = "";
     byId("modify-message").className = "booking-message";
 
