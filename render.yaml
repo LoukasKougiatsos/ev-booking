@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ev-booking
+    env: java
+    buildCommand: cd server && ./mvnw package -DskipTests
+    startCommand: java -jar server/target/server-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        generateValue: true
+      - key: INSTANCE_ID
+        value: render-1
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
