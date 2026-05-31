@@ -1,74 +1,176 @@
-# EV Charging Station Booking System
+# ChargeFlow - EV Charging Station Booking System
 
-Practice implementation of a cloud-ready booking system for EV charging
-stations. Server: Spring Boot + Postgres. Client: static HTML + Leaflet,
-served by the same Spring Boot app.
+ChargeFlow is a web application for finding electric vehicle charging stations
+and reserving charging time slots. Drivers can register, log in, explore nearby
+stations on a map, book a connector, and manage their reservations. Admin users
+can manage stations, connectors, and bookings.
 
-## Structure
+The backend is a Spring Boot REST API with PostgreSQL persistence. The frontend
+is a static HTML, CSS, and JavaScript client served by the same Spring Boot
+application.
 
-```
+## Features
+
+- Driver registration and login with JWT authentication
+- Role-based access control for DRIVER and ADMIN users
+- Interactive station discovery map using Leaflet and OpenStreetMap
+- Connector filtering and available time slot selection
+- Booking creation, modification, and cancellation
+- Conflict checks to prevent overlapping bookings
+- Admin panel for managing stations, connectors, and all bookings
+- Flyway database migrations and seed data
+- Render-ready deployment configuration
+
+## Tech Stack
+
+- Java 17
+- Spring Boot 3.3.5
+- Spring Security
+- Spring Data JPA
+- PostgreSQL 16
+- Flyway
+- HTML, CSS, and JavaScript
+- Leaflet.js with OpenStreetMap tiles
+- Docker and Docker Compose
+- Render
+
+## Project Structure
+
+```text
 ev-booking/
-├── server/                         Spring Boot REST API (Java 17, Maven)
-│   └── src/main/resources/
-│       ├── static/                 HTML/JS client (to be added)
-│       └── db/migration/           Flyway SQL migrations
-├── docs/                           Design notes, ER diagram
-└── docker-compose.yml              Local Postgres 16
+├── docker-compose.yml              Local PostgreSQL database
+├── render.yaml                     Render deployment blueprint
+├── README.md
+└── server/
+    ├── Dockerfile                  Production container build
+    ├── pom.xml                     Maven project file
+    └── src/
+        ├── main/java/com/evbooking/server/
+        │   ├── admin/              Admin API
+        │   ├── auth/               Login, registration, JWT
+        │   ├── booking/            Booking API and business rules
+        │   ├── config/             Security and request logging
+        │   ├── discovery/          Station discovery API
+        │   ├── entity/             JPA entities
+        │   └── repository/         Spring Data repositories
+        └── main/resources/
+            ├── db/migration/       Flyway SQL migrations
+            └── static/             Frontend pages and assets
 ```
 
-## Local dev setup
+## Local Setup
 
-### 1. Start Postgres
+### 1. Start PostgreSQL
 
 ```bash
 docker compose up -d
 ```
 
-This brings up Postgres 16 on `localhost:5432` with:
-- database: `ev_booking`
-- user: `ev_user`
-- password: `dev_password`
+This starts PostgreSQL on `localhost:55432`.
 
-### 2. Run the server
+Database details:
+
+```text
+database: ev_booking
+user:     ev_user
+password: dev_password
+```
+
+### 2. Run the Server
 
 ```bash
 cd server
 ./mvnw spring-boot:run
 ```
 
-The active profile defaults to `dev` (see `application.yaml`), which points
-at the local Docker database. Flyway runs the migrations automatically on
-startup.
+On Windows PowerShell:
 
-Seed accounts (password: `changeme`):
-
-| email                   | role   |
-|-------------------------|--------|
-| admin@evbooking.local   | ADMIN  |
-| alice@example.com       | DRIVER |
-| bob@example.com         | DRIVER |
-
-### 3. Stop Postgres
-
-```bash
-docker compose down          # keeps data volume
-docker compose down -v       # also wipes the volume
+```powershell
+cd server
+.\mvnw.cmd spring-boot:run
 ```
 
-## Deployment (Render)
+The app runs at:
 
-Set the following environment variables in your Render web service:
+```text
+http://localhost:8080
+```
 
-| Variable                    | Value                                         |
-|-----------------------------|-----------------------------------------------|
-| `SPRING_PROFILES_ACTIVE`    | `prod`                                        |
-| `SPRING_DATASOURCE_URL`     | `jdbc:postgresql://<host>:<port>/<db>`        |
-| `SPRING_DATASOURCE_USERNAME`| db user                                       |
-| `SPRING_DATASOURCE_PASSWORD`| db password                                   |
+Flyway runs the database migrations automatically when the application starts.
 
-> Render's `DATABASE_URL` is in `postgres://` format. Convert it to the
-> `jdbc:postgresql://` form before pasting into `SPRING_DATASOURCE_URL`.
+## Seed Accounts
 
-## Status
+The local seed data creates these users:
 
-In progress.
+| Email | Password | Role |
+| --- | --- | --- |
+| `driver1@example.com` | `driver123` | DRIVER |
+| `driver2@example.com` | `driver123` | DRIVER |
+| `admin@example.com` | `admin123` | ADMIN |
+
+## Main Pages
+
+| Page | Purpose |
+| --- | --- |
+| `/index.html` | Landing page |
+| `/register.html` | Driver account registration |
+| `/login.html` | User login |
+| `/discover.html` | Map-based station discovery and booking |
+| `/mybookings.html` | Driver booking management |
+| `/admin.html` | Admin station, connector, and booking management |
+
+## API Overview
+
+| Endpoint Group | Purpose |
+| --- | --- |
+| `/auth` | Login and registration |
+| `/api/stations` | Station discovery |
+| `/api/connectors` | Connector list and slot availability |
+| `/bookings` | Create, view, update, and cancel bookings |
+| `/api/admin` | Admin-only station, connector, and booking management |
+
+## Testing
+
+Start PostgreSQL first, then run:
+
+```bash
+cd server
+./mvnw test
+```
+
+On Windows PowerShell:
+
+```powershell
+cd server
+.\mvnw.cmd test
+```
+
+## Deployment on Render
+
+The project includes a `render.yaml` file and a server `Dockerfile` for Render
+deployment.
+
+For production, set these environment variables in Render:
+
+| Variable | Value |
+| --- | --- |
+| `SPRING_PROFILES_ACTIVE` | `prod` |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://<host>:<port>/<db>` |
+| `SPRING_DATASOURCE_USERNAME` | Render database username |
+| `SPRING_DATASOURCE_PASSWORD` | Render database password |
+| `JWT_SECRET` | Long random secret for signing JWTs |
+
+Render may provide the database URL in `postgres://` format. The Spring Boot
+configuration expects the JDBC format:
+
+```text
+jdbc:postgresql://<host>:<port>/<db>
+```
+
+## Notes
+
+- The `dev` profile uses the local Docker PostgreSQL database.
+- The `prod` profile reads database settings from environment variables.
+- Booking times are stored as offset date-times.
+- Booking conflict checks are handled on the backend to protect against double
+  reservations.
