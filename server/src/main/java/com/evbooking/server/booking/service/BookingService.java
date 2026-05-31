@@ -1,23 +1,23 @@
 package com.evbooking.server.booking.service;
 
+import com.evbooking.server.booking.dto.BookingResponse;
 import com.evbooking.server.booking.dto.CreateBookingRequest;
+import com.evbooking.server.booking.dto.UpdateBookingRequest;
 import com.evbooking.server.booking.exception.ConflictException;
+import com.evbooking.server.booking.exception.ForbiddenOperationException;
+import com.evbooking.server.booking.exception.NotFoundException;
 import com.evbooking.server.entity.Booking;
 import com.evbooking.server.entity.BookingStatus;
 import com.evbooking.server.entity.Connector;
+import com.evbooking.server.entity.User;
 import com.evbooking.server.repository.BookingRepository;
 import com.evbooking.server.repository.ConnectorRepository;
 import com.evbooking.server.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-import com.evbooking.server.entity.User;
-import java.util.List;
-import com.evbooking.server.booking.dto.UpdateBookingRequest;
-import com.evbooking.server.booking.exception.ForbiddenOperationException;
-import java.time.OffsetDateTime;
-import com.evbooking.server.booking.exception.NotFoundException;
-import com.evbooking.server.booking.dto.BookingResponse;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 public class BookingService {
@@ -37,72 +37,50 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse createBooking(
-<<<<<<< HEAD
-            String email,
-            CreateBookingRequest request
-=======
-            CreateBookingRequest request,
-            Long userId
->>>>>>> main
-    ) {
+    public BookingResponse createBooking(String email, CreateBookingRequest request) {
 
-        Connector connector =
-                connectorRepository.findById(
-                        request.connectorId()
-                ).orElseThrow(() ->
-                        new NotFoundException("Booking not found"));
-
-
+        Connector connector = connectorRepository.findById(request.connectorId())
+                .orElseThrow(() -> new NotFoundException("Connector not found"));
 
         if (!request.endTime().isAfter(request.startTime())) {
-            throw new ConflictException(
-                    "End time must be after start time"
-            );
+            throw new ConflictException("End time must be after start time");
         }
 
-        bookingRepository.lockActiveBookingsForConnector(
-                connector.getId()
+        User user = findUser(email);
+
+        boolean userOverlap = bookingRepository.existsUserOverlap(
+                user.getId(),
+                request.startTime(),
+                request.endTime()
         );
+        if (userOverlap) {
+            throw new ConflictException("You already have an overlapping booking in that time period");
+        }
 
-        boolean conflict =
-                bookingRepository.existsConflict(
-                        connector.getId(),
-                        request.startTime(),
-                        request.endTime()
-                );
+        bookingRepository.lockActiveBookingsForConnector(connector.getId());
 
+        boolean conflict = bookingRepository.existsConflict(
+                connector.getId(),
+                request.startTime(),
+                request.endTime()
+        );
         if (conflict) {
-            throw new ConflictException(
-                    "Booking slot already taken"
-            );
+            throw new ConflictException("Booking slot already taken");
         }
 
         Booking booking = new Booking();
-
-<<<<<<< HEAD
-        booking.setUser(findUser(email));
-=======
-        User user = new User();
-        user.setId(userId);
-
         booking.setUser(user);
->>>>>>> main
-
         booking.setConnector(connector);
         booking.setStartTime(request.startTime());
         booking.setEndTime(request.endTime());
         booking.setStatus(BookingStatus.ACTIVE);
 
-        Booking savedBooking = bookingRepository.save(booking);
-
-        return toResponse(savedBooking);
+        return toResponse(bookingRepository.save(booking));
     }
 
     @Transactional(readOnly = true)
     public List<BookingResponse> getMyBookings(String email) {
         User user = findUser(email);
-
         return bookingRepository.findByUserId(user.getId())
                 .stream()
                 .map(this::toResponse)
@@ -118,11 +96,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse cancelBooking(
-            String email,
-            boolean admin,
-            Long bookingId
-    ) {
+    public BookingResponse cancelBooking(String email, boolean admin, Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
@@ -130,24 +104,15 @@ public class BookingService {
         ensureOwnerOrAdmin(booking, email, admin);
 
         if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
-            throw new ForbiddenOperationException(
-                    "Cannot cancel a booking that has already started"
-            );
+            throw new ForbiddenOperationException("Cannot cancel a booking that has already started");
         }
+
         booking.setStatus(BookingStatus.CANCELLED);
-
-        Booking savedBooking = bookingRepository.save(booking);
-
-        return toResponse(savedBooking);
+        return toResponse(bookingRepository.save(booking));
     }
 
     @Transactional
-    public BookingResponse updateBooking(
-            String email,
-            boolean admin,
-            Long bookingId,
-            UpdateBookingRequest request
-    ) {
+    public BookingResponse updateBooking(String email, boolean admin, Long bookingId, UpdateBookingRequest request) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
@@ -155,56 +120,36 @@ public class BookingService {
         ensureOwnerOrAdmin(booking, email, admin);
 
         if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
-            throw new ForbiddenOperationException(
-                    "Cannot modify a booking that has already started"
-            );
+            throw new ForbiddenOperationException("Cannot modify a booking that has already started");
         }
 
         if (!request.endTime().isAfter(request.startTime())) {
-            throw new ConflictException(
-                    "End time must be after start time"
-            );
+            throw new ConflictException("End time must be after start time");
         }
 
-        if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
-            throw new ForbiddenOperationException(
-                    "Cannot modify a booking that has already started"
-            );
-        }
-
-        boolean connectorConflict =
-                bookingRepository.existsConflict(
-                        booking.getConnector().getId(),
-                        request.startTime(),
-                        request.endTime()
-                );
-
+        boolean connectorConflict = bookingRepository.existsConflict(
+                booking.getConnector().getId(),
+                request.startTime(),
+                request.endTime()
+        );
         if (connectorConflict) {
-            throw new ConflictException(
-                    "Booking slot already taken"
-            );
+            throw new ConflictException("Booking slot already taken");
         }
 
-        boolean userOverlap =
-                bookingRepository.existsUserOverlapExcludingBooking(
-                        booking.getUser().getId(),
-                        booking.getId(),
-                        request.startTime(),
-                        request.endTime()
-                );
-
+        boolean userOverlap = bookingRepository.existsUserOverlapExcludingBooking(
+                booking.getUser().getId(),
+                booking.getId(),
+                request.startTime(),
+                request.endTime()
+        );
         if (userOverlap) {
-            throw new ConflictException(
-                    "User already has an overlapping booking"
-            );
+            throw new ConflictException("User already has an overlapping booking");
         }
 
         booking.setStartTime(request.startTime());
         booking.setEndTime(request.endTime());
 
-        Booking savedBooking = bookingRepository.save(booking);
-
-        return toResponse(savedBooking);
+        return toResponse(bookingRepository.save(booking));
     }
 
     private User findUser(String email) {
@@ -219,7 +164,6 @@ public class BookingService {
     }
 
     private BookingResponse toResponse(Booking booking) {
-
         return new BookingResponse(
                 booking.getId(),
                 booking.getUser().getId(),

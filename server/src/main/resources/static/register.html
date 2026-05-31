@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ChargeFlow Register</title>
   <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
 </head>
 <body>
   <main class="register-page">
@@ -104,10 +105,8 @@
       }
 
       const data = await res.json();
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('role', data.role);
-      localStorage.setItem('userId', data.userId);
-      window.location.href = 'discover.html';
+      window.Auth.setToken(data.token);
+      window.location.href = data.role === 'ADMIN' ? 'admin.html' : 'discover.html';
     } catch {
       alert('Network error. Please try again.');
     }
