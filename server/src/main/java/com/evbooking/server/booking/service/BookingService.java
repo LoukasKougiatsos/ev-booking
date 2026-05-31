@@ -38,8 +38,13 @@ public class BookingService {
 
     @Transactional
     public BookingResponse createBooking(
+<<<<<<< HEAD
             String email,
             CreateBookingRequest request
+=======
+            CreateBookingRequest request,
+            Long userId
+>>>>>>> main
     ) {
 
         Connector connector =
@@ -75,7 +80,14 @@ public class BookingService {
 
         Booking booking = new Booking();
 
+<<<<<<< HEAD
         booking.setUser(findUser(email));
+=======
+        User user = new User();
+        user.setId(userId);
+
+        booking.setUser(user);
+>>>>>>> main
 
         booking.setConnector(connector);
         booking.setStartTime(request.startTime());

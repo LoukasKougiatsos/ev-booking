@@ -5,7 +5,10 @@ import com.evbooking.server.booking.dto.BookingResponse;
 import com.evbooking.server.booking.dto.UpdateBookingRequest;
 import com.evbooking.server.booking.service.BookingService;
 import jakarta.validation.Valid;
+<<<<<<< HEAD
 import org.springframework.security.access.prepost.PreAuthorize;
+=======
+>>>>>>> main
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,15 +20,14 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    public BookingController(
-            BookingService bookingService
-    ) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
     @PostMapping
     @PreAuthorize("hasRole('DRIVER') or hasRole('ADMIN')")
     public BookingResponse createBooking(
+<<<<<<< HEAD
             Authentication authentication,
             @Valid @RequestBody
             CreateBookingRequest request
@@ -44,6 +46,19 @@ public class BookingController {
         return bookingService.getMyBookings(
                 authentication.getName()
         );
+=======
+            @Valid @RequestBody CreateBookingRequest request,
+            Authentication auth
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return bookingService.createBooking(request, userId);
+    }
+
+    @GetMapping("/my")
+    public List<BookingResponse> getMyBookings(Authentication auth) {
+        Long userId = (Long) auth.getPrincipal();
+        return bookingService.getMyBookings(userId);
+>>>>>>> main
     }
 
     @GetMapping
@@ -53,6 +68,7 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
+<<<<<<< HEAD
     @PreAuthorize("hasRole('DRIVER') or hasRole('ADMIN')")
     public BookingResponse cancelBooking(
             Authentication authentication,
@@ -63,6 +79,10 @@ public class BookingController {
                 isAdmin(authentication),
                 id
         );
+=======
+    public BookingResponse cancelBooking(@PathVariable Long id) {
+        return bookingService.cancelBooking(id);
+>>>>>>> main
     }
 
     @PutMapping("/{id}")
@@ -72,12 +92,16 @@ public class BookingController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateBookingRequest request
     ) {
+<<<<<<< HEAD
         return bookingService.updateBooking(
                 authentication.getName(),
                 isAdmin(authentication),
                 id,
                 request
         );
+=======
+        return bookingService.updateBooking(id, request);
+>>>>>>> main
     }
 
     private boolean isAdmin(Authentication authentication) {
