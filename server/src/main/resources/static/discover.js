@@ -3,7 +3,7 @@
     return;
   }
 
-  var center = [51.5074, -0.1278];
+  var center = [37.9838, 23.7275];
 
   var map = L.map("discover-map", {
     zoomControl: false,
