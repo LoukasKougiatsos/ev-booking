@@ -67,5 +67,51 @@
       </div>
     </section>
   </main>
+<script>
+  document.querySelector('.register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+
+    if (password !== confirm) {
+      alert('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 8) {
+      alert('Password must be at least 8 characters.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (res.status === 409) {
+        alert('An account with this email already exists.');
+        return;
+      }
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || 'Registration failed. Please try again.');
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.role);
+      localStorage.setItem('userId', data.userId);
+      window.location.href = 'discover.html';
+    } catch {
+      alert('Network error. Please try again.');
+    }
+  });
+</script>
 </body>
 </html>

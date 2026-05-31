@@ -1,14 +1,13 @@
 package com.evbooking.server.booking.controller;
 
 import com.evbooking.server.booking.dto.CreateBookingRequest;
-import com.evbooking.server.booking.service.BookingService;
-import com.evbooking.server.entity.Booking;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import com.evbooking.server.entity.Booking;
-import com.evbooking.server.booking.dto.UpdateBookingRequest;
 import com.evbooking.server.booking.dto.BookingResponse;
+import com.evbooking.server.booking.dto.UpdateBookingRequest;
+import com.evbooking.server.booking.service.BookingService;
+import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -17,35 +16,27 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    public BookingController(
-            BookingService bookingService
-    ) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
     @PostMapping
     public BookingResponse createBooking(
-            @Valid @RequestBody
-            CreateBookingRequest request
+            @Valid @RequestBody CreateBookingRequest request,
+            Authentication auth
     ) {
-
-        return bookingService.createBooking(
-                request
-        );
+        Long userId = (Long) auth.getPrincipal();
+        return bookingService.createBooking(request, userId);
     }
 
     @GetMapping("/my")
-    public List<BookingResponse> getMyBookings() {
-
-        return bookingService.getMyBookings(
-                1L
-        );
+    public List<BookingResponse> getMyBookings(Authentication auth) {
+        Long userId = (Long) auth.getPrincipal();
+        return bookingService.getMyBookings(userId);
     }
 
     @DeleteMapping("/{id}")
-    public BookingResponse cancelBooking(
-            @PathVariable Long id
-    ) {
+    public BookingResponse cancelBooking(@PathVariable Long id) {
         return bookingService.cancelBooking(id);
     }
 
@@ -54,9 +45,6 @@ public class BookingController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateBookingRequest request
     ) {
-        return bookingService.updateBooking(
-                id,
-                request
-        );
+        return bookingService.updateBooking(id, request);
     }
 }

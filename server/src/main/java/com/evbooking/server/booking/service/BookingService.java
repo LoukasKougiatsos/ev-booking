@@ -34,7 +34,8 @@ public class BookingService {
 
     @Transactional
     public BookingResponse createBooking(
-            CreateBookingRequest request
+            CreateBookingRequest request,
+            Long userId
     ) {
 
         Connector connector =
@@ -71,7 +72,7 @@ public class BookingService {
         Booking booking = new Booking();
 
         User user = new User();
-        user.setId(1L);
+        user.setId(userId);
 
         booking.setUser(user);
 
