@@ -243,8 +243,8 @@
     var stationConnectors = connectorsForStation(connectors, station);
 
     connectorList.innerHTML = stationConnectors.map(function (c, index) {
-      var statusClass = index % 3 === 1 ? "busy" : "available";
-      var statusText = statusClass === "busy" ? "IN USE" : "AVAILABLE";
+      var statusClass = "available";
+      var statusText = "AVAILABLE";
       var maxKw = c.maxKw != null ? c.maxKw : "N/A";
       return [
         '<div class="connector-item">',
