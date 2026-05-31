@@ -36,15 +36,21 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
-    public BookingResponse cancelBooking(@PathVariable Long id) {
-        return bookingService.cancelBooking(id);
+    public BookingResponse cancelBooking(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return bookingService.cancelBooking(id, userId);
     }
 
     @PutMapping("/{id}")
     public BookingResponse updateBooking(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateBookingRequest request
+            @Valid @RequestBody UpdateBookingRequest request,
+            Authentication auth
     ) {
-        return bookingService.updateBooking(id, request);
+        Long userId = (Long) auth.getPrincipal();
+        return bookingService.updateBooking(id, request, userId);
     }
 }

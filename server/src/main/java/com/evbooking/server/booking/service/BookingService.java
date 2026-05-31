@@ -95,10 +95,16 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse cancelBooking(Long bookingId) {
+    public BookingResponse cancelBooking(Long bookingId, Long userId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
+
+        if (!booking.getUser().getId().equals(userId)) {
+            throw new ForbiddenOperationException(
+                    "Cannot cancel a booking that belongs to another user"
+            );
+        }
 
         if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
             throw new ForbiddenOperationException(
@@ -115,11 +121,18 @@ public class BookingService {
     @Transactional
     public BookingResponse updateBooking(
             Long bookingId,
-            UpdateBookingRequest request
+            UpdateBookingRequest request,
+            Long userId
     ) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
+
+        if (!booking.getUser().getId().equals(userId)) {
+            throw new ForbiddenOperationException(
+                    "Cannot modify a booking that belongs to another user"
+            );
+        }
 
         if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
             throw new ForbiddenOperationException(
@@ -133,17 +146,12 @@ public class BookingService {
             );
         }
 
-        if (booking.getStartTime().isBefore(OffsetDateTime.now())) {
-            throw new ForbiddenOperationException(
-                    "Cannot modify a booking that has already started"
-            );
-        }
-
         boolean connectorConflict =
-                bookingRepository.existsConflict(
+                bookingRepository.existsConflictExcludingBooking(
                         booking.getConnector().getId(),
                         request.startTime(),
-                        request.endTime()
+                        request.endTime(),
+                        bookingId
                 );
 
         if (connectorConflict) {
@@ -153,10 +161,11 @@ public class BookingService {
         }
 
         boolean userOverlap =
-                bookingRepository.existsUserOverlap(
+                bookingRepository.existsUserOverlapExcludingBooking(
                         booking.getUser().getId(),
                         request.startTime(),
-                        request.endTime()
+                        request.endTime(),
+                        bookingId
                 );
 
         if (userOverlap) {
