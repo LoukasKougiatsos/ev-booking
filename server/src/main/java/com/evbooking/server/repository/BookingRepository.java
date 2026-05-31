@@ -28,6 +28,26 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             OffsetDateTime startTime,
             OffsetDateTime endTime
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT COUNT(b) > 0
+        FROM Booking b
+        WHERE b.connector.id = :connectorId
+        AND b.id <> :excludeBookingId
+        AND b.status = 'ACTIVE'
+        AND (
+            :startTime < b.endTime
+            AND :endTime > b.startTime
+        )
+    """)
+    boolean existsConflictExcludingBooking(
+            Long connectorId,
+            OffsetDateTime startTime,
+            OffsetDateTime endTime,
+            Long excludeBookingId
+    );
+
     List<Booking> findByUserId(Long userId);
 
     List<Booking> findAllByOrderByStartTimeDesc();

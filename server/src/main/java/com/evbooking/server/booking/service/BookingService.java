@@ -127,10 +127,11 @@ public class BookingService {
             throw new ConflictException("End time must be after start time");
         }
 
-        boolean connectorConflict = bookingRepository.existsConflict(
+        boolean connectorConflict = bookingRepository.existsConflictExcludingBooking(
                 booking.getConnector().getId(),
                 request.startTime(),
-                request.endTime()
+                request.endTime(),
+                booking.getId()
         );
         if (connectorConflict) {
             throw new ConflictException("Booking slot already taken");

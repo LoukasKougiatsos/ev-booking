@@ -37,7 +37,8 @@
   }
 
   function canEdit(booking) {
-    return new Date(booking.startTime).getTime() > Date.now();
+    var status = (booking.status || "").toUpperCase();
+    return status === "ACTIVE" && new Date(booking.startTime).getTime() > Date.now();
   }
 
   function combineToIso(date, time) {

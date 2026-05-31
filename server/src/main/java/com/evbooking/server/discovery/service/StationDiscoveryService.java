@@ -1,6 +1,10 @@
 package com.evbooking.server.discovery.service;
 
 import com.evbooking.server.discovery.dto.StationDiscoveryItem;
+import com.evbooking.server.entity.Connector;
+import com.evbooking.server.entity.Station;
+import com.evbooking.server.repository.ConnectorRepository;
+import com.evbooking.server.repository.StationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,10 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
@@ -27,6 +33,13 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 public class StationDiscoveryService {
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final StationRepository stationRepository;
+    private final ConnectorRepository connectorRepository;
+
+    public StationDiscoveryService(StationRepository stationRepository, ConnectorRepository connectorRepository) {
+        this.stationRepository = stationRepository;
+        this.connectorRepository = connectorRepository;
+    }
 
     @Value("${app.ev.api-base-url:https://api.api-ninjas.com/v1/evcharger}")
     private String apiBaseUrl;
@@ -36,7 +49,7 @@ public class StationDiscoveryService {
 
     public List<StationDiscoveryItem> search(Double latitude, Double longitude, Integer radius, Integer limit) {
         if (!StringUtils.hasText(apiKey)) {
-            throw new ResponseStatusException(SERVICE_UNAVAILABLE, "EV API key is not configured on the server.");
+            return localStations(limit);
         }
 
         double lat = latitude != null ? latitude : 37.7749;
@@ -69,16 +82,62 @@ public class StationDiscoveryService {
             }
             return stations;
         } catch (HttpStatusCodeException ex) {
-            String upstream = ex.getResponseBodyAsString();
-            String message = StringUtils.hasText(upstream)
-                    ? "Upstream EV API error: " + upstream
-                    : "Upstream EV API request failed with status " + ex.getStatusCode().value();
-            throw new ResponseStatusException(BAD_GATEWAY, message, ex);
+            return localStations(limit);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception ex) {
-            throw new ResponseStatusException(BAD_GATEWAY, "Failed to fetch charging stations from upstream API.", ex);
+            return localStations(limit);
         }
+    }
+
+    private List<StationDiscoveryItem> localStations(Integer limit) {
+        int maxItems = sanitizeLimit(limit);
+        Map<Long, List<Connector>> connectorsByStation = connectorRepository.findAllWithStation().stream()
+                .collect(Collectors.groupingBy(connector -> connector.getStation().getId()));
+
+        return stationRepository.findAll().stream()
+                .sorted(Comparator.comparing(Station::getId))
+                .limit(maxItems)
+                .map(station -> toLocalStation(station, connectorsByStation.getOrDefault(station.getId(), List.of())))
+                .toList();
+    }
+
+    private StationDiscoveryItem toLocalStation(Station station, List<Connector> connectors) {
+        String connectorSummary = connectors.stream()
+                .map(connector -> switch (connector.getConnectorType()) {
+                    case TYPE2 -> "Type 2";
+                    case CCS -> "CCS";
+                    case CHADEMO -> "CHAdeMO";
+                    case TESLA -> "Tesla";
+                })
+                .distinct()
+                .collect(Collectors.joining(", "));
+
+        Integer maxKw = connectors.stream()
+                .map(Connector::getMaxKw)
+                .filter(Objects::nonNull)
+                .mapToInt(value -> value.setScale(0, java.math.RoundingMode.HALF_UP).intValue())
+                .max()
+                .orElse(0);
+
+        int total = connectors.size();
+
+        return new StationDiscoveryItem(
+                String.valueOf(station.getId()),
+                station.getName(),
+                station.getAddress(),
+                "Athens",
+                null,
+                "Greece",
+                station.getLatitude(),
+                station.getLongitude(),
+                StringUtils.hasText(connectorSummary) ? connectorSummary : "Unknown",
+                maxKw > 0 ? maxKw : null,
+                null,
+                total > 0 ? total : null,
+                total > 0 ? total : null,
+                true
+        );
     }
 
     private StationDiscoveryItem mapToStation(Map<?, ?> raw) {

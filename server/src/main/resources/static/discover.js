@@ -3,7 +3,7 @@
     return;
   }
 
-  var center = [37.7749, -122.4194];
+  var center = [37.9838, 23.7275];
 
   var map = L.map("discover-map", {
     zoomControl: false,
@@ -234,17 +234,29 @@
 
   function connectorsForStation(connectors, station) {
     if (!Array.isArray(connectors)) return [];
-    var desired = Number.isInteger(station && station.total) && station.total > 0 ? station.total : null;
-    if (!desired) return connectors;
-    return connectors.slice(0, desired);
+    var stationId = Number(station && station.id);
+    if (!Number.isFinite(stationId)) return connectors;
+    return connectors.filter(function (connector) {
+      return Number(connector.stationId) === stationId;
+    });
   }
 
   function renderConnectorList(connectors, station) {
     var stationConnectors = connectorsForStation(connectors, station);
 
+    if (!stationConnectors.length) {
+      connectorList.innerHTML = '<p class="booking-message error">No connectors are configured for this station.</p>';
+      connectorSelect.innerHTML = "";
+      slotGrid.innerHTML = "";
+      selectedSlot = null;
+      selectedSlotLabel.textContent = "None";
+      setBookingMessage("No connectors available for this station.", "error");
+      return;
+    }
+
     connectorList.innerHTML = stationConnectors.map(function (c, index) {
-      var statusClass = index % 3 === 1 ? "busy" : "available";
-      var statusText = statusClass === "busy" ? "IN USE" : "AVAILABLE";
+      var statusClass = "available";
+      var statusText = "AVAILABLE";
       var maxKw = c.maxKw != null ? c.maxKw : "N/A";
       return [
         '<div class="connector-item">',
