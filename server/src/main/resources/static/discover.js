@@ -244,6 +244,16 @@
   function renderConnectorList(connectors, station) {
     var stationConnectors = connectorsForStation(connectors, station);
 
+    if (!stationConnectors.length) {
+      connectorList.innerHTML = '<p class="booking-message error">No connectors are configured for this station.</p>';
+      connectorSelect.innerHTML = "";
+      slotGrid.innerHTML = "";
+      selectedSlot = null;
+      selectedSlotLabel.textContent = "None";
+      setBookingMessage("No connectors available for this station.", "error");
+      return;
+    }
+
     connectorList.innerHTML = stationConnectors.map(function (c, index) {
       var statusClass = "available";
       var statusText = "AVAILABLE";
