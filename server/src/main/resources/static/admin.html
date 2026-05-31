@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - ChargeFlow</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="bookings-page">
+    <section class="discover-shell">
+      <header class="discover-topbar">
+        <a class="discover-brand" href="index.html">CHARGEFLOW</a>
+        <nav class="discover-nav">
+          <a href="discover.html">DISCOVER</a>
+          <a href="mybookings.html">MY BOOKINGS</a>
+          <a class="active" href="admin.html">ADMIN</a>
+        </nav>
+        <div class="discover-top-icons">
+          <span>&#128276;</span>
+          <button id="logout-btn" type="button" class="chip">Logout</button>
+        </div>
+      </header>
+
+      <section class="bookings-content admin-content">
+        <h1>Admin Panel</h1>
+        <p class="admin-subtitle">List all bookings and manage stations/connectors.</p>
+        <p id="admin-message" class="bookings-message"></p>
+
+        <section class="admin-block">
+          <div class="admin-block-head">
+            <h2>All Bookings</h2>
+            <button id="refresh-bookings" type="button" class="chip">Refresh</button>
+          </div>
+          <div id="admin-bookings" class="bookings-list"></div>
+        </section>
+
+        <section class="admin-block">
+          <div class="admin-block-head">
+            <h2>Stations</h2>
+          </div>
+          <form id="station-form" class="admin-form-grid">
+            <input type="hidden" id="station-id">
+            <input id="station-name" type="text" placeholder="Station name" required>
+            <input id="station-address" type="text" placeholder="Address" required>
+            <input id="station-lat" type="number" step="any" placeholder="Latitude" required>
+            <input id="station-lng" type="number" step="any" placeholder="Longitude" required>
+            <button type="submit" class="btn-save">Save Station</button>
+            <button type="button" id="station-clear" class="btn-cancel">Clear</button>
+          </form>
+          <div id="admin-stations" class="admin-table"></div>
+        </section>
+
+        <section class="admin-block">
+          <div class="admin-block-head">
+            <h2>Connectors</h2>
+          </div>
+          <form id="connector-form" class="admin-form-grid">
+            <input type="hidden" id="connector-id">
+            <select id="connector-station" required></select>
+            <select id="connector-type" required>
+              <option value="CCS">CCS</option>
+              <option value="TYPE2">TYPE2</option>
+              <option value="CHADEMO">CHADEMO</option>
+              <option value="TESLA">TESLA</option>
+            </select>
+            <input id="connector-kw" type="number" step="0.1" placeholder="Max kW" required>
+            <button type="submit" class="btn-save">Save Connector</button>
+            <button type="button" id="connector-clear" class="btn-cancel">Clear</button>
+          </form>
+          <div id="admin-connectors" class="admin-table"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
