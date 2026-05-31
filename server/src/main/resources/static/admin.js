@@ -42,7 +42,15 @@
 
   function fmt(dt) {
     if (!dt) return "-";
-    return new Date(dt).toLocaleString();
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "UTC"
+    }).format(new Date(dt));
   }
 
   function canModify(booking) {
@@ -91,14 +99,18 @@
   }
 
   function toLocalDateInput(date) {
-    var y = date.getFullYear();
-    var m = String(date.getMonth() + 1).padStart(2, "0");
-    var d = String(date.getDate()).padStart(2, "0");
+    var y = date.getUTCFullYear();
+    var m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    var d = String(date.getUTCDate()).padStart(2, "0");
     return y + "-" + m + "-" + d;
   }
 
   function toLocalTimeInput(date) {
-    return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+    return String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0");
+  }
+
+  function combineToIso(date, time) {
+    return date + "T" + time + ":00Z";
   }
 
   function openAdminModifyDialog(id) {
@@ -138,8 +150,8 @@
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          startTime: new Date(date + "T" + start + ":00").toISOString(),
-          endTime: new Date(date + "T" + end + ":00").toISOString()
+          startTime: combineToIso(date, start),
+          endTime: combineToIso(date, end)
         })
       });
       var raw = await res.text();

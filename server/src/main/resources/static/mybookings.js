@@ -17,7 +17,8 @@
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "2-digit",
-      year: "numeric"
+      year: "numeric",
+      timeZone: "UTC"
     }).format(toDate(dt));
   }
 
@@ -25,7 +26,8 @@
     return new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false
+      hour12: false,
+      timeZone: "UTC"
     }).format(toDate(dt));
   }
 
@@ -42,18 +44,18 @@
   }
 
   function combineToIso(date, time) {
-    return new Date(date + "T" + time + ":00").toISOString();
+    return date + "T" + time + ":00Z";
   }
 
   function toLocalDateInput(date) {
-    var y = date.getFullYear();
-    var m = String(date.getMonth() + 1).padStart(2, "0");
-    var d = String(date.getDate()).padStart(2, "0");
+    var y = date.getUTCFullYear();
+    var m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    var d = String(date.getUTCDate()).padStart(2, "0");
     return y + "-" + m + "-" + d;
   }
 
   function toLocalTimeInput(date) {
-    return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+    return String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0");
   }
 
   function setPageMessage(text, isError) {

@@ -153,13 +153,24 @@ public class BookingService {
         return toResponse(bookingRepository.save(booking));
     }
 
-    private User findUser(String email) {
-        return userRepository.findByEmail(email)
+    private User findUser(String principal) {
+        return userRepository.findByEmail(principal)
+                .or(() -> findUserByIdPrincipal(principal))
                 .orElseThrow(() -> new ForbiddenOperationException("Authenticated user not found"));
     }
 
-    private void ensureOwnerOrAdmin(Booking booking, String email, boolean admin) {
-        if (!admin && !booking.getUser().getEmail().equals(email)) {
+    private java.util.Optional<User> findUserByIdPrincipal(String principal) {
+        try {
+            return userRepository.findById(Long.parseLong(principal));
+        } catch (NumberFormatException ex) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    private void ensureOwnerOrAdmin(Booking booking, String principal, boolean admin) {
+        boolean ownerByEmail = booking.getUser().getEmail().equals(principal);
+        boolean ownerById = booking.getUser().getId().toString().equals(principal);
+        if (!admin && !ownerByEmail && !ownerById) {
             throw new ForbiddenOperationException("Cannot access another user's booking");
         }
     }
